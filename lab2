@@ -1,0 +1,409 @@
+/* Main.cpp */
+#include <iostream>
+#include "Shape.h"
+#include "Circle.h"
+#include "Rectangle.h"
+#include "Controller.h"
+#include "Triangle.h"
+#include "Geometricshape.h"
+#include <vector>
+using std::cout;
+using std::endl;
+using std::cin;
+int Circle::count=0;
+int Rectangle::count= 0;
+int Triangle::count = 0;
+int main() {
+    int shape, sidecolor, incolor, dim;
+    double x_, y_, width, length, radius, s1, s2, s3;
+    bool f, emt;
+
+    cout << "Chose a shape: 0 for circle; 1 for rectangle ; 2 for triangle:";
+    cin >> shape;
+    if (shape != 0 && shape != 1 && shape != 2)
+    {
+        cout << "no such a kind of shape provided!";
+        return 0;
+    }
+
+    cout << "please input coordinates: " << endl;
+    cin >> x_ >> y_;
+
+    cout << "Sidecolor: 0 for R; 1 for G; 2 for B" << endl;
+    cin >> sidecolor;
+
+    cout << "filled color: 0 for R; 1 for G; 2 for B" << endl;
+    cin >> incolor;
+
+
+    cout << "Is the shape filled? 1 for true/0 for false: " << endl;
+    cin >> f;
+
+
+    cout << "dimensions: " << endl;
+    cin >> dim;
+
+
+    cout << "environment: 1 for true/0 for false: " << endl;
+    cin >> emt;
+    if (0 == shape) {
+        cout << "radius: " << endl;
+        cin >> radius;
+        Circle c{ x_,y_,radius,static_cast<Color>(sidecolor),static_cast<inColor>(incolor),f,dim,emt };
+        cout << c.toString() << endl;
+
+    }
+    else if (1 == shape) {
+        cout << "width & height" << endl;
+        cin >> width >> length;
+        Rectangle r{ x_,y_,width,length,static_cast<Color>(sidecolor),static_cast<inColor>(incolor),f,dim,emt };
+        cout << r.toString() << endl;
+    }
+    else if (2 == shape) {
+        cout << "side1 & side2 & side3: ";
+        cin >> s1 >> s2 >> s3;
+        Triangle t{ x_,y_,s1,s2,s3,static_cast<Color>(sidecolor),static_cast<inColor>(incolor),f,dim,emt };
+        cout << t.toString() << endl;
+    }
+    std::vector<GeometricShape*> shapes;
+    shapes.push_back(new Rectangle(new Color(), 100, 50));
+    shapes.push_back(new Circle(new Color(), 50));
+    shapes.push_back(new Triangle(new Color(), 100, 50));
+    for (auto shape : shapes) {
+        shape->draw();
+        delete shape;
+    }
+    return 0;
+}
+/*Point.cpp*/
+#include "Point.h"
+using std::to_string;
+//point管理图形坐标
+void Point::setCoordinates(double x_, double y_) { x = x_; y = y_; }
+string Point::getCoordinates() const { return "(" + to_string(x) + ", " + to_string(y) + ")"; }
+/*Point.h*/
+#pragma once
+#include "Shape.h"
+#include <string>
+
+class Point {
+private:
+    double x;    //横坐标
+    double y;    //纵坐标
+public:
+    Point() = default;
+    Point(double x_, double y_) { x = x_; y = y_; }
+    void setCoordinates(double x_, double y_);
+    string getCoordinates() const;
+};
+/*Shape.cpp*/
+#include "Shape.h"
+//Shape 管理图形的颜色以及是否填充
+Shape::Shape(Color color_, inColor incolor_, bool filled_) {
+    color = color_;
+    filled = filled_;
+    incolor = incolor_;
+}
+
+Color Shape::getColor() { return color; }
+void Shape::setColor(Color color_) { color = color_; }
+bool Shape::isFilled() { return filled; }
+void Shape::setFilled(bool filled_) { filled = filled_; }
+
+inColor Shape::getInColor() { return incolor; }
+void Shape::setInColor(inColor incolor_) { incolor = incolor_; }
+
+
+
+string Shape::toString() {
+    return "Shape: " + colorToString() + " " + filledToString();
+}
+
+string Shape::colorToString() {
+    return colorNames[static_cast<int>(color)];
+}
+
+string Shape::inColorToString() {
+    return inColorNames[static_cast<int>(incolor)];
+}
+
+string Shape::filledToString() {
+    return (filled ? "filled"s : "not filled"s);
+}
+/*Shape.h*/
+#include "Controller.h"
+#include <iostream>
+#include <string>
+#include <array>
+#include "Color.h"
+
+using std::string;
+using namespace std::string_literals;
+using std::to_string;
+
+class Shape {
+private:
+    Color color{ Color::R };
+    inColor incolor{ inColor::R };
+    bool filled{ false };
+    std::array<string, 3> colorNames{ "Red"s, "Green"s, "Blue"s, };
+    std::array<string, 3> inColorNames{ "Red"s, "Green"s, "Blue"s, };
+
+public:
+    Shape() = default;
+    Shape(Color color_, inColor incolor_, bool filled_);
+
+    Color getColor();
+    void setColor(Color color_);
+    bool isFilled();
+    void setFilled(bool filled_);
+
+    inColor getInColor();
+    void setInColor(inColor incolor_);
+
+    string toString();
+    string colorToString();
+    string inColorToString();
+    string filledToString();
+
+};
+/*Controller.cpp*/
+#include "Controller.h"
+//Controller管理图形的维数、是否存在环境
+Controller::Controller(int d, bool e) {
+    dimensions = d;
+    environment = e;
+}
+void Controller::setEnvironment(bool e) {
+    environment = e;
+}
+void Controller::setDimensions(int d) {
+    dimensions = d;
+}
+bool Controller::getEnvironment() { return environment; }
+int Controller::getDimensions() { return dimensions; }
+
+/*Controller.h*/
+class Controller {
+private:
+    bool environment{ false };
+    int dimensions{ 2 };
+public:
+    Controller() = default;
+    Controller(int d, bool e);
+    void setEnvironment(bool);
+    void setDimensions(int);
+    bool getEnvironment();
+    int getDimensions();
+
+    ~Controller() { environment = false; }
+};
+/*Color.h*/
+#pragma once
+
+enum class Color {
+    R, G, B,
+};
+
+enum class inColor {
+    R, G, B,
+};
+/*Geometricshape.h*/
+#pragma once
+#include "Color.h"
+
+class GeometricShape {
+protected:
+    Color* borderColor;
+public:
+    GeometricShape(Color* borderColor) : borderColor(borderColor) {}
+    GeometricShape(){}
+    virtual ~GeometricShape() {}
+    virtual void draw() = 0;
+   
+};
+/*Rectangle.cpp*/
+#include "Rectangle.h"
+void Rectangle::draw() {};
+int Rectangle::getCount() { return count; }
+Rectangle::Rectangle(double x_, double y_, double w, double h, Color c, inColor incolor_, bool f, int dim, bool emt)
+    :width{ w }, height{ h }, Shape{ c,incolor_ ,f } {
+    setCoordinates(x_, y_);
+    setDimensions(dim);
+    setEnvironment(emt);
+}
+Rectangle::~Rectangle() { setEnvironment(false); 
+count--;
+std::cout << "Rectangle destroyed. " << count << " objects of Rectangle are alive." << std::endl;
+delete borderColor;
+Rectangle* rect = new Rectangle(new Color(), 100, 50);
+rect->draw();
+delete rect;
+
+}
+
+double Rectangle::getWidth() const { return width; }
+void Rectangle::setWidth(double w) { width = w; }
+double Rectangle::getHeight() const { return height; }
+void Rectangle::setHeight(double h) { height = h; }
+
+
+string Rectangle::toString() {
+    if (getEnvironment())
+        return "Rectangle: \ncoordinates:" + getCoordinates() + "\nsize " + to_string(width * height) + "\n" + "sideColor:" + colorToString() + (isFilled() ? ("\nincolor: " + inColorToString()) : ("\n" + filledToString())) + +"\ndimensions: " + to_string(getDimensions()) + "\nenvironment: " + (getEnvironment() ? "True" : "False");
+    else
+        return "Rectangle failed because environment is false";
+}
+
+/*Rectangle.h*/
+#pragma once
+#include "Shape.h"
+#include "Point.h"
+#include "Controller.h"
+#include "Geometricshape.h"
+
+class Rectangle :public Shape, public Point, public Controller,public GeometricShape {
+private:
+    double width{ 1.0 };
+    double height{ 1.0 };
+    static int count;
+public:
+    static int getCount();
+    Rectangle() = default;
+    Rectangle(double x_, double y_, double w, double h, Color c, inColor incolor_, bool f, int dim, bool emt);
+    ~Rectangle();
+
+    double getWidth() const;
+    void setWidth(double w);
+    double getHeight() const;
+    void setHeight(double h);
+
+    Rectangle(Color* borderColor, int width, int height) :GeometricShape(borderColor), width(width), height(height) {}
+    Rectangle(const Rectangle& other) :GeometricShape(new Color(*other.borderColor)), width(other.width), height(other.height) {}
+    
+    void draw();
+    string toString();
+   
+};
+/*Triangle.cpp*/
+#include "Triangle.h"
+void Triangle::draw() {};
+ int Triangle::getCount() { return count; }
+Triangle::Triangle(double x_, double y_, double s1, double s2, double s3, Color c, inColor incolor_, bool f, int dim, bool emt)
+    :Shape{ c,incolor_ ,f }, side1{ s1 }, side2{ s2 }, side3{ s3 } {
+    setCoordinates(x_, y_);
+    setDimensions(dim);
+    setEnvironment(emt);
+}
+Triangle::~Triangle() {
+    setEnvironment(false);
+    count--;
+    std::cout << "Triangle destroyed. " << count << " objects of Triangle are alive." << std::endl;
+    delete borderColor;
+    Triangle* rect = new Triangle(new Color(), 100, 50);
+    rect->draw();
+    delete rect;
+};
+void Triangle::setSides(double s1, double s2, double s3) { side1 = s1; side2 = s2; side3 = s3; }
+string Triangle::getSides() const { return "side1: " + to_string(side1) + " side2: " + to_string(side2) + " side3: " + to_string(side3); }
+
+
+string Triangle::toString() {
+
+    return getEnvironment() ? ("Triangle: \ncoordinates: " + getCoordinates() + "\nsides: " + getSides() + "\nsideColor: " + colorToString() + (isFilled() ? ("\nincolor: " + inColorToString()) : ("\n" + filledToString())) + "\ndimensions: " + to_string(getDimensions()) + "\nenvironment: " + (getEnvironment() ? "True" : "False")
+        ) : "Triangle failed because environment is false";
+}
+/*Triangle.h*/
+#pragma once
+#include "Shape.h"
+#include "Point.h"
+#include "Controller.h"
+#include "Geometricshape.h"
+
+class Triangle :public Shape, public Point, public Controller,public GeometricShape {
+private:
+    double side1;
+    double side2;
+    double side3;
+    static int count;
+public:
+    static int getCount();
+    Triangle() = default;
+    ~Triangle();
+    Triangle(double x_, double y_, double s1, double s2, double s3, Color c, inColor incolor_, bool f, int dim, bool emt);
+
+    string getSides() const;
+    void setSides(double s1, double s2, double s3);
+
+    string toString();
+    Triangle(Color* borderColor, int base, int height) :GeometricShape(borderColor) {}
+    Triangle(const Triangle& other) : GeometricShape(new Color(*other.borderColor)){}
+    void draw();
+   
+
+};
+/*Circle.cpp*/
+#include <iostream>
+#include "Circle.h"
+void Circle::draw() {};
+Circle::Circle() = default;
+
+Circle::Circle(double x_, double y_, double radius_, Color color_, inColor incolor_, bool filled_, int dim, bool emt)
+    :Shape{ color_,incolor_ ,filled_ } {
+    radius = radius_;
+    setDimensions(dim);
+    setEnvironment(emt);
+    setCoordinates(x_, y_);
+}
+Circle::~Circle() { setEnvironment(false); count--;
+            std::cout << "Circle destroyed. " << count << " objects of Circle are alive." << std::endl;
+            delete borderColor;
+            Circle* rect = new Circle(new Color(), 100);
+            rect->draw();
+            delete rect;
+}
+
+double Circle::getRadius() const {
+    return radius;
+}
+
+void Circle::setRadius(double radius) {
+    this->radius = radius;
+}
+
+string Circle::toString() {
+    if (getEnvironment())
+        return ("Circle: \ncoordinates: " + getCoordinates() + "\nradius: " + std::to_string(radius) +
+            "\nsideColor: " + colorToString() + (isFilled() ? ("\nincolor: " + inColorToString()) : ("\n" + filledToString())) + "\n"
+            + "Environment: " + (getEnvironment() ? "True" : "False"));
+    else
+        return "Circle failed because environment is false";
+}
+ 
+/*Circle.h*/
+#pragma once
+#include "Shape.h"
+#include "Point.h"
+#include "Controller.h"
+#include "GeometricShape.h"
+
+
+class Circle :public Shape, public Point, public Controller, public GeometricShape {
+private:
+    double radius;
+    static int count;
+public:
+    static int getCount() {}
+    Circle();
+    ~Circle();
+    Circle(double x_, double y_, double radius_, Color color_, inColor incolor_, bool filled_, int dim, bool emt);
+   
+    Circle(const Circle& other) : GeometricShape(new Color(*other.borderColor)), radius(other.radius) {}
+    double getRadius() const;
+    void setRadius(double radius);
+
+    string toString();
+  
+        Circle(Color* borderColor, int radius) : GeometricShape(borderColor), radius(radius) {}
+        void draw();
+    };
